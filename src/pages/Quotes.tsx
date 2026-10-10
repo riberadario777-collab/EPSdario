@@ -1,0 +1,12 @@
+import {useEffect,useState} from 'react'; import {supabase} from '../lib/supabase'
+export default function Quotes(){
+ const [cl,setCl]=useState<any[]>([]),[pr,setPr]=useState<any[]>([]),[qs,setQs]=useState<any[]>([]),[c,setC]=useState(''),[p,setP]=useState(''),[n,setN]=useState('1'),[ls,setLs]=useState<any[]>([]),[err,setErr]=useState('')
+ const load=async()=>{setCl((await supabase.from('clients').select('id,name')).data||[]);setPr((await supabase.from('products').select('*').eq('active',true)).data||[]);setQs((await supabase.from('quotes').select('*,clients(name),quote_items(qty,products(code,volume_piece,price_m3))').order('number',{ascending:false})).data||[])}
+ useEffect(()=>{load()},[])
+ const tot=(a:any[])=>a.reduce((s,x)=>s+x.qty*x.products.volume_piece*x.products.price_m3,0)
+ return <><div className="card"><h3>Nueva cotización</h3><select value={c} onChange={e=>setC(e.target.value)}><option value="">Cliente…</option>{cl.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select>
+ <select value={p} onChange={e=>setP(e.target.value)}><option value="">Producto…</option>{pr.map(x=><option key={x.id} value={x.id}>{x.code} {x.espesor}x{x.largo}x{x.ancho}</option>)}</select><input type="number" style={{width:70}} value={n} onChange={e=>setN(e.target.value)}/>
+ <button className="b" onClick={()=>{const x=pr.find(y=>y.id===p);if(x)setLs([...ls,{id:x.id,qty:Number(n),products:x}])}}>Agregar</button>{ls.map((x,i)=><div key={i}>{x.products.code} × {x.qty}</div>)}<p>Total referencial Bs {tot(ls).toFixed(2)}</p>
+ <button className="b" onClick={async()=>{if(!c||!ls.length)return setErr('Elija cliente y productos');const {data:q,error}=await supabase.from('quotes').insert({client_id:c}).select().single();if(error)return setErr(error.message);const {error:e2}=await supabase.from('quote_items').insert(ls.map(x=>({quote_id:q.id,product_id:x.id,qty:x.qty})));setErr(e2?.message||'');setLs([]);load()}}>Guardar</button><span className="err"> {err}</span></div>
+ <div className="card tw"><table><thead><tr><th>N°</th><th>Cliente</th><th>Total ref. Bs</th><th>Estado</th><th/></tr></thead><tbody>{qs.map(q=><tr key={q.id}><td>{q.number}</td><td>{q.clients?.name}</td><td>{tot(q.quote_items).toFixed(2)}</td><td>{q.status}</td><td>{q.status==='abierta'&&<button className="b" onClick={async()=>{const {error}=await supabase.rpc('convert_quote',{p_id:q.id});setErr(error?.message||'');load()}}>Convertir en pedido</button>}</td></tr>)}</tbody></table></div></>
+}

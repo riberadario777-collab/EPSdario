@@ -1,0 +1,13 @@
+PASOS (sin conocimientos técnicos)
+SUPABASE
+ 1) Cree un proyecto en supabase.com.
+ 2) Authentication > Users > Add user: ponga SU correo y clave (será el administrador).
+ 3) SQL Editor > New query: pegue TODO el contenido de BASE_DE_DATOS_COMPLETA.sql y pulse Run (una sola vez).
+ 4) SQL Editor > New query: abra SQL_2_admin.sql, cambie CAMBIAR@CORREO.COM por su correo y pulse Run.
+ 5) Settings > API: copie "Project URL" y la clave "anon / publishable".
+ 6) No necesita crear buckets.
+NETLIFY
+ 1) Suba la carpeta del proyecto (o conéctela desde GitHub). Build: npm run build  Publish: dist
+ 2) Site settings > Environment variables: VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY con los valores del paso 5.
+ 3) Deploy. Ingrese con su correo y clave.
+ Otros usuarios: se registran en la pantalla de acceso y usted les asigna el rol en el menú "Usuarios".

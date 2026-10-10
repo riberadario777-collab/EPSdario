@@ -1,0 +1,5 @@
+import Crud from '../components/Crud'; import {supabase} from '../lib/supabase'
+export default ()=><Crud table="products" title="Productos EPS (medidas en cm, precio por m³)" fields={[{k:'code',l:'Código'},{k:'name',l:'Descripción'},{k:'espesor',l:'Espesor',t:'number'},{k:'largo',l:'Largo',t:'number'},{k:'ancho',l:'Ancho',t:'number'},{k:'price_m3',l:'Precio m³ (Bs)',t:'number'}]}
+ cols={['code','name','espesor','largo','ancho','volume_piece','price_m3','stock']}
+ actions={(r,reload)=><><button className="b" onClick={async()=>{const q=Number(prompt('Piezas que ingresan'));if(!q)return;const {error}=await supabase.rpc('stock_in',{p_product:r.id,p_qty:q});if(error)alert(error.message);reload()}}>+ Entrada</button>
+ <button className="b" onClick={async()=>{const d=Number(prompt('Ajuste (+/- piezas)'));const w=prompt('Motivo');if(!d||!w)return;const {error}=await supabase.rpc('adjust_stock',{p_product:r.id,p_delta:d,p_reason:w});if(error)alert(error.message);reload()}}>Ajuste</button></>}/>
